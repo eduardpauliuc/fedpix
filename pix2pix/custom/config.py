@@ -5,10 +5,12 @@ from albumentations.pytorch import ToTensorV2
 # DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
 # DEVICE = "cpu"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-TRAIN_DIR = "/Users/eduardpauliuc/PycharmProjects/federated/maps/train"
-VAL_DIR = "/Users/eduardpauliuc/PycharmProjects/federated/maps/val"
-MODELS_DIR = "/Users/eduardpauliuc/PycharmProjects/federated/saved_models"
-EVALUATION_DIR = "/Users/eduardpauliuc/PycharmProjects/federated/maps/evaluation"
+ROOT_DIR = "/Users/eduardpauliuc/PycharmProjects/federated"
+TRAIN_DIR = ROOT_DIR + "/maps/train"
+VAL_DIR = ROOT_DIR + "/maps/val"
+MODELS_DIR = ROOT_DIR + "/saved_models"
+EVALUATION_DIR = ROOT_DIR + "/maps/evaluation"
+RESULTS_DIR = ROOT_DIR + "/results"
 LEARNING_RATE = 2e-4
 BATCH_SIZE = 1
 NUM_WORKERS = 2
@@ -16,7 +18,6 @@ IMAGE_SIZE = 256
 CHANNELS_IMG = 3
 L1_LAMBDA = 100
 LAMBDA_GP = 10
-NUM_EPOCHS = 100
 LOAD_MODEL = True
 SAVE_MODEL = True
 CHECKPOINT_DISC = "inv_disc.pth.tar"
@@ -37,7 +38,6 @@ transform_only_input = A.Compose(
         ToTensorV2(),
     ]
 )
-
 
 transform_only_input_no_jitter = A.Compose(
     [

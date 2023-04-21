@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 import config
 from dataset import MapDataset
-from utils import save_some_examples
+from utils import save_some_examples, save_results
 from pt_constants import PTConstants
 from generator_model import Generator
 from discriminator_model import Discriminator
@@ -90,6 +90,7 @@ class PixTrainer(Executor):
         self._n_iterations = None
 
         self._evaluation_folder = None
+        self._results_folder = None
 
         # Setup the persistence manager to save PT model.
         # The default training configuration is used by persistence manager
@@ -124,6 +125,10 @@ class PixTrainer(Executor):
         self._evaluation_folder = os.path.join(config.EVALUATION_DIR, client_name)
         if not os.path.exists(self._evaluation_folder):
             os.makedirs(self._evaluation_folder)
+
+        self._results_folder = os.path.join(config.RESULTS_DIR, client_name)
+        if not os.path.exists(self._results_folder):
+            os.makedirs(self._results_folder)
 
     def handle_event(self, event_type: str, fl_ctx: FLContext):
         if event_type == EventType.START_RUN:
@@ -208,10 +213,20 @@ class PixTrainer(Executor):
         # Basic training
         self.gen.train()
         self.disc.train()
+
+        results_queue = []
+
         for epoch in range(self._epochs):
-            self.train_fn(fl_ctx, epoch, abort_signal)
+            results = self.train_fn(fl_ctx, epoch, abort_signal)
+
+            results_queue.append(results)
 
             run_number = shared_context.get_prop(AppConstants.CURRENT_ROUND)
+
+            if config.SAVE_MODEL and epoch % 5 == 0:
+                save_results(results_queue, run_number=run_number, folder=self._results_folder)
+                results_queue = []
+
             save_some_examples(self.gen, self._val_loader, epoch, run_number, folder=self._evaluation_folder)
 
             # running_loss = 0.0
@@ -245,6 +260,13 @@ class PixTrainer(Executor):
 
     def train_fn(self, fl_ctx, epoch, abort_signal):
         loop = tqdm(self._train_loader, leave=True)
+
+        d_loss = 0
+        dr_loss = 0
+        df_loss = 0
+        gl1_loss = 0
+        gf_loss = 0
+        g_loss = 0
 
         for idx, (x, y) in enumerate(loop):
             if abort_signal.triggered:
@@ -293,6 +315,17 @@ class PixTrainer(Executor):
                     D_real_loss=D_real_loss.item(),
                     D_fake_loss=D_fake_loss.item()
                 )
+
+            dr_loss += D_real_loss.cpu().item()
+            df_loss += D_fake_loss.cpu().item()
+            d_loss += D_loss.cpu().item()
+            gl1_loss += L1.cpu().item()
+            gf_loss += G_fake_loss.cpu().item()
+            g_loss += G_loss.cpu().item()
+
+        return (d_loss / len(self._train_loader), dr_loss / len(self._train_loader), \
+                df_loss / len(self._train_loader), g_loss / len(self._train_loader), \
+                gf_loss / len(self._train_loader), gl1_loss / len(self._train_loader))
 
     def _save_local_model(self, fl_ctx: FLContext):
         run_dir = fl_ctx.get_engine().get_workspace().get_run_dir(fl_ctx.get_prop(ReservedKey.RUN_NUM))

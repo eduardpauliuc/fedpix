@@ -105,7 +105,6 @@ class Generator(nn.Module):
                 init.normal_(m.weight.data, 1.0, init_gain)
                 init.constant_(m.bias.data, 0.0)
 
-        print('initialize network with %s' % init_type)
         self.apply(init_func)  # apply the initialization function <init_func>
 
     def forward(self, x):

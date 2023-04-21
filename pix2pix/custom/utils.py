@@ -1,3 +1,5 @@
+import os
+
 import torch
 import config
 from torchvision.utils import save_image
@@ -17,22 +19,13 @@ def save_some_examples(gen, val_loader, epoch, run_number, folder):
     gen.train()
 
 
-def save_checkpoint(model, optimizer, filename="my_checkpoint.pth.tar"):
-    print("=> Saving checkpoint")
-    checkpoint = {
-        "state_dict": model.state_dict(),
-        "optimizer": optimizer.state_dict(),
-    }
-    torch.save(checkpoint, filename)
+def save_results(results, run_number, folder):
+    filename = f"results_{run_number}.txt"
+    path = os.path.join(folder, filename)
 
-
-def load_checkpoint(checkpoint_file, model, optimizer, lr):
-    print("=> Loading checkpoint")
-    checkpoint = torch.load(checkpoint_file, map_location=config.DEVICE)
-    model.load_state_dict(checkpoint["state_dict"])
-    optimizer.load_state_dict(checkpoint["optimizer"])
-
-    # If we don't do this then it will just have learning rate of old checkpoint
-    # and it will lead to many hours of debugging \:
-    for param_group in optimizer.param_groups:
-        param_group["lr"] = lr
+    with open(path, "a+") as f:
+        # Writing data to a file
+        print(results)
+        for result in results:
+            f.write(" ".join([str(x) for x in result]) + '\n')
+        f.close()
