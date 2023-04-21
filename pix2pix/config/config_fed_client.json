@@ -1,0 +1,22 @@
+{
+  "format_version": 2,
+
+  "executors": [
+    {
+      "tasks": ["train", "submit_model", "get_weights"],
+      "executor": {
+        "path": "pix_trainer.PixTrainer",
+        "args": {
+          "lr": 0.002,
+          "epochs": 5
+        }
+      }
+    }
+  ],
+  "task_result_filters": [
+  ],
+  "task_data_filters": [
+  ],
+  "components": [
+  ]
+}
