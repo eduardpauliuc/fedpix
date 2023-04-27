@@ -7,7 +7,7 @@
       "executor": {
         "path": "pix_trainer.PixTrainer",
         "args": {
-          "lr": 0.002,
+          "lr": 0.0002,
           "epochs": 20
         }
       }
