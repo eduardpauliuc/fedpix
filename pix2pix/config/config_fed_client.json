@@ -8,7 +8,7 @@
         "path": "pix_trainer.PixTrainer",
         "args": {
           "lr": 0.002,
-          "epochs": 5
+          "epochs": 20
         }
       }
     }

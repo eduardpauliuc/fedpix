@@ -119,7 +119,7 @@ class PixTrainer(Executor):
 
         val_dir = os.path.join(config.VAL_DIR, client_name)
         self._val_dataset = MapDataset(root_dir=val_dir)
-        self._val_loader = DataLoader(self._val_dataset, batch_size=1, shuffle=False)
+        self._val_loader = DataLoader(self._val_dataset, batch_size=1, shuffle=True)
         self._n_iterations = len(self._train_loader)
 
         self._evaluation_folder = os.path.join(config.EVALUATION_DIR, client_name)
