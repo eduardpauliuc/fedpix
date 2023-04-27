@@ -7,7 +7,7 @@ from albumentations.pytorch import ToTensorV2
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # ROOT_DIR = "/Users/eduardpauliuc/PycharmProjects/federated"
-ROOT_DIR = "/content/drive/MyDrive/Licenta/"
+ROOT_DIR = "/content/drive/MyDrive/Licenta"
 TRAIN_DIR = ROOT_DIR + "/maps/train"
 VAL_DIR = ROOT_DIR + "/maps/val"
 MODELS_DIR = ROOT_DIR + "/saved_models"
