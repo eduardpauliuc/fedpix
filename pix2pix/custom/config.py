@@ -5,7 +5,9 @@ from albumentations.pytorch import ToTensorV2
 # DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
 # DEVICE = "cpu"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-ROOT_DIR = "/Users/eduardpauliuc/PycharmProjects/federated"
+
+# ROOT_DIR = "/Users/eduardpauliuc/PycharmProjects/federated"
+ROOT_DIR = "/content/drive/MyDrive/Licenta/"
 TRAIN_DIR = ROOT_DIR + "/maps/train"
 VAL_DIR = ROOT_DIR + "/maps/val"
 MODELS_DIR = ROOT_DIR + "/saved_models"
@@ -18,7 +20,7 @@ IMAGE_SIZE = 256
 CHANNELS_IMG = 3
 L1_LAMBDA = 100
 LAMBDA_GP = 10
-LOAD_MODEL = True
+LOAD_MODEL = False
 SAVE_MODEL = True
 CHECKPOINT_DISC = "inv_disc.pth.tar"
 CHECKPOINT_GEN = "inv_gen.pth.tar"

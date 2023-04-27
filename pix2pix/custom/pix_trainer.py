@@ -259,7 +259,7 @@ class PixTrainer(Executor):
             #
 
     def train_fn(self, fl_ctx, epoch, abort_signal):
-        loop = tqdm(self._train_loader, leave=True)
+        # loop = tqdm(self._train_loader, leave=True)
 
         d_loss = 0
         dr_loss = 0
@@ -268,7 +268,7 @@ class PixTrainer(Executor):
         gf_loss = 0
         g_loss = 0
 
-        for idx, (x, y) in enumerate(loop):
+        for idx, (x, y) in enumerate(self._train_loader):
             if abort_signal.triggered:
                 # If abort_signal is triggered, we simply return.
                 # The outside function will check it again and decide steps to take.
@@ -306,15 +306,15 @@ class PixTrainer(Executor):
             if idx % 5 == 0:
                 self.log_info(
                     fl_ctx, f"Epoch: {epoch}/{self._epochs}, Iteration: {idx}, "
-                            f"D_real: {torch.sigmoid(D_real).mean().item()}"
+                            f"G_loss: {G_loss.cpu().item()}"
                 )
 
-                loop.set_postfix(
-                    D_real=torch.sigmoid(D_real).mean().item(),
-                    D_fake=torch.sigmoid(D_fake).mean().item(),
-                    D_real_loss=D_real_loss.item(),
-                    D_fake_loss=D_fake_loss.item()
-                )
+                # loop.set_postfix(
+                #     D_real=torch.sigmoid(D_real).mean().item(),
+                #     D_fake=torch.sigmoid(D_fake).mean().item(),
+                #     D_real_loss=D_real_loss.item(),
+                #     D_fake_loss=D_fake_loss.item()
+                # )
 
             dr_loss += D_real_loss.cpu().item()
             df_loss += D_fake_loss.cpu().item()
