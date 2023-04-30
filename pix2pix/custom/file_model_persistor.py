@@ -189,6 +189,9 @@ class PTFileModelPersistorGAN(FLComponent):
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
+        if not os.path.exists(config.MODELS_DIR):
+            os.makedirs(config.MODELS_DIR)
+
         if isinstance(self.model_gen, str):
             # treat it as model component ID
             model_component_id = self.model_gen
