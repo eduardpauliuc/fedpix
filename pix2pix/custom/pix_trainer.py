@@ -208,7 +208,7 @@ class PixTrainer(Executor):
         self.gen.load_state_dict(state_dict=gen_weights)
         self.disc.load_state_dict(state_dict=disc_weights)
 
-        shared_context = fl_ctx.get_prop(FLContextKey.PEER_CONTEXT)
+        # shared_context = fl_ctx.get_prop(FLContextKey.PEER_CONTEXT)
 
         # Basic training
         self.gen.train()
@@ -221,13 +221,13 @@ class PixTrainer(Executor):
 
             results_queue.append(results)
 
-            run_number = shared_context.get_prop(AppConstants.CURRENT_ROUND)
+            # run_number = shared_context.get_prop(AppConstants.CURRENT_ROUND)
 
-            if config.SAVE_MODEL and epoch % 5 == 0:
-                save_results(results_queue, run_number=run_number, folder=self._results_folder)
+            if config.SAVE_MODEL and epoch % 5 == 0 or epoch == self._epochs:
+                save_results(results_queue, folder=self._results_folder)
                 results_queue = []
 
-            save_some_examples(self.gen, self._val_loader, epoch, run_number, folder=self._evaluation_folder)
+            save_some_examples(self.gen, self._val_loader, epoch, folder=self._evaluation_folder)
 
             # running_loss = 0.0
             # for i, batch in enumerate(self._train_loader):
@@ -323,8 +323,8 @@ class PixTrainer(Executor):
             gf_loss += G_fake_loss.cpu().item()
             g_loss += G_loss.cpu().item()
 
-        return (d_loss / len(self._train_loader), dr_loss / len(self._train_loader), \
-                df_loss / len(self._train_loader), g_loss / len(self._train_loader), \
+        return (d_loss / len(self._train_loader), dr_loss / len(self._train_loader),
+                df_loss / len(self._train_loader), g_loss / len(self._train_loader),
                 gf_loss / len(self._train_loader), gl1_loss / len(self._train_loader))
 
     def _save_local_model(self, fl_ctx: FLContext):
