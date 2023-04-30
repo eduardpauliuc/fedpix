@@ -60,7 +60,7 @@
       "path": "scatter_and_gather_gan.ScatterAndGatherGAN",
       "args": {
         "min_clients": 3,
-        "num_rounds": 10,
+        "num_rounds": 20,
         "start_round": 0,
         "wait_time_after_min_received": 10,
         "aggregator_id": "aggregator",
