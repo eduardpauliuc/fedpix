@@ -223,7 +223,7 @@ class PixTrainer(Executor):
 
             # run_number = shared_context.get_prop(AppConstants.CURRENT_ROUND)
 
-            if config.SAVE_MODEL and epoch % 5 == 0 or epoch == self._epochs:
+            if config.SAVE_MODEL and epoch % 5 == 0 or epoch == self._epochs - 1:
                 save_results(results_queue, folder=self._results_folder)
                 results_queue = []
 
