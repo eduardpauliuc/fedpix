@@ -1,0 +1,8 @@
+Results in inv_results centralised
+FID score: 190.9847592153065
+
+Results from FEDERATED 20 RUNS
+FID score: 206.08029278701636
+
+Results from FEDERATED 10 RUNS
+FID score: 220.21262486503966
