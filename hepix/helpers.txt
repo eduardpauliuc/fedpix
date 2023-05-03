@@ -1,0 +1,6 @@
+./scripts/tu_post_cleanup.sh
+./scripts/tu_pre_start.sh
+
+./workspacehe/hepix/prod_00/admin@nvidia.com/startup/fl_admin.sh
+
+cp -R  hepix workspacehe/hepix/prod_00/admin@nvidia.com/transfer

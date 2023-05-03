@@ -1,0 +1,67 @@
+{
+  "format_version": 2,
+
+  "executors": [
+    {
+      "tasks": ["train", "submit_model", "get_weights"],
+      "executor": {
+        "path": "pix_trainer.PixTrainer",
+        "args": {
+          "lr": 0.0002,
+          "epochs": 2
+        }
+      }
+    }
+  ],
+  "task_result_filters": [
+    {
+      "tasks": ["train"],
+      "filters":[
+          {
+          "path": "model_encryptor.HEModelEncryptor",
+          "args": {
+            "encrypt_layers": [
+              "initial_down.0.weight",
+              "bottleneck.0.weight",
+              "final_up.0.weight",
+              "initial.0.weight",
+              "model.3.weight"
+            ],
+            "weigh_by_local_iter": true
+          }
+        }
+      ]
+    },
+    {
+      "tasks": ["submit_model"],
+      "filters":[
+          {
+          "path": "model_encryptor.HEModelEncryptor",
+          "args": {
+            "encrypt_layers": [
+              "initial_down.0.weight",
+              "bottleneck.0.weight",
+              "initial.0.weight",
+              "model.3.weight"
+            ],
+            "weigh_by_local_iter": false
+          }
+        }
+      ]
+    }
+  ],
+  "task_data_filters": [
+    {
+      "tasks": ["train", "validate"],
+      "filters":[
+          {
+          "name": "HEModelDecryptor",
+          "args": {
+          }
+        }
+      ]
+    }
+  ],
+  "components": [
+  ]
+}

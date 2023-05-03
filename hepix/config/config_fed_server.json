@@ -1,0 +1,81 @@
+{
+  "format_version": 2,
+  "server": {
+    "heart_beat_timeout": 600
+  },
+  "task_data_filters": [],
+  "task_result_filters": [],
+  "components": [
+    {
+      "id": "serialize_filter",
+      "name": "HEModelSerializeFilter",
+      "args": {
+      }
+    },
+    {
+      "id": "persistor",
+      "path": "file_model_persistor.PTFileModelPersistorGAN",
+      "args": {
+        "model_disc": {
+          "path": "discriminator_model.Discriminator"
+        },
+        "model_gen": {
+          "path": "generator_model.Generator"
+        },
+        "global_model_file_name_gen" : "FL_gen_global_model.pt",
+        "global_model_file_name_disc" : "FL_disc_global_model.pt",
+        "best_global_model_file_name_gen" : "FL_gen_best_model.pt",
+        "best_global_model_file_name_disc" : "FL_disc_best_model.pt",
+        "exclude_vars": "lr",
+        "filter_id": "serialize_filter"
+      }
+    },
+    {
+      "id": "shareable_generator",
+      "path": "full_model_shareable_generator_gan.FullModelShareableGeneratorGAN",
+      "args": {}
+    },
+    {
+      "id": "aggregator",
+      "path": "nvflare.app_common.aggregators.intime_accumulate_model_aggregator.InTimeAccumulateWeightedAggregator",
+      "args": {
+        "expected_data_kind": {
+          "gen": "WEIGHTS",
+          "disc": "WEIGHTS"
+        },
+        "aggregation_weights": {
+          "site-1": 1.0,
+          "site-2": 1.0,
+          "site-3": 1.0
+        }
+      }
+    },
+    {
+      "id": "model_locator",
+      "path": "pt_model_locator.PTModelLocator",
+      "args": {}
+    },
+    {
+      "id": "json_generator",
+      "path": "nvflare.app_common.widgets.validation_json_generator.ValidationJsonGenerator",
+      "args": {}
+    }
+  ],
+  "workflows": [
+    {
+      "id": "scatter_and_gather",
+      "path": "scatter_and_gather_gan.ScatterAndGatherGAN",
+      "args": {
+        "min_clients": 3,
+        "num_rounds": 2,
+        "start_round": 0,
+        "wait_time_after_min_received": 10,
+        "aggregator_id": "aggregator",
+        "persistor_id": "persistor",
+        "shareable_generator_id": "shareable_generator",
+        "train_task_name": "train",
+        "train_timeout": 0
+      }
+    }
+  ]
+}
