@@ -14,7 +14,7 @@ def load_img(path):
 class MapDataset(Dataset):
     def __init__(self, root_dir, jitter=True, AtoB=False):
         self.root_dir = root_dir
-        self.list_files = os.listdir(self.root_dir)
+        self.list_files = sorted(os.listdir(self.root_dir), key=lambda f: int(f[:-4]))
         self.jitter = jitter
         self.AtoB = AtoB
 

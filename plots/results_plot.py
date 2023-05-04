@@ -27,7 +27,7 @@ with open(filename, 'r') as f:
 
     plt.xlabel('Epochs')
     plt.ylabel('Metrics')
-    plt.title('Discriminator Metrics Site 3')
+    plt.title('Discriminator')
     plt.legend()
     plt.show()
 
@@ -39,17 +39,8 @@ with open(filename, 'r') as f:
 
     plt.xlabel('Epochs')
     plt.ylabel('Metrics')
-    plt.title('Generator Metrics Site 3')
+    plt.title('Generator')
     plt.legend()
     plt.show()
 
-    # results = [{'d_total': x[0], 'd_real': x[1], 'd_fake': x[2], 'g_total': x[3], 'g_fake': x[4], 'g_real': x[5]} for x
-    #            in results]
-
-    # D total: x[0]
-    # D real: x[1]
-    # D fake: x[2]
-    # G total: x[3]
-    # G real: x[4]
-    # G fake: x[5]
     print(len(results))

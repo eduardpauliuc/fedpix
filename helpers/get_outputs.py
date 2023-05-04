@@ -20,6 +20,7 @@ def load_checkpoint(filename, model):
     print("=> Loading checkpoint")
     # checkpoint = torch.load(checkpoint_file, map_location=config.DEVICE)
     model.load_state_dict(data_gen["model"])
+    # model.load_state_dict(data_gen["state_dict"])
 
 
 def run_predictions(gen, folder):
@@ -33,7 +34,7 @@ def run_predictions(gen, folder):
         with torch.no_grad():
             y_fake = gen(x)
             y_fake = y_fake * 0.5 + 0.5  # remove normalization#
-            save_image(y_fake, folder + f"/{idx}.png")
+            save_image(y_fake, folder + f"/{idx+1}.png")
             # save_image(x * 0.5 + 0.5, folder + f"/{}.png")
             # save_image(y * 0.5 + 0.5, "real_outputs" + f"/{idx}.png")
 
