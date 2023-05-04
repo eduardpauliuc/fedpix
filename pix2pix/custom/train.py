@@ -1,5 +1,5 @@
 import torch
-from utils import save_checkpoint, load_checkpoint, save_some_examples
+from utils import save_some_examples
 import torch.nn as nn
 import torch.optim as optim
 import config

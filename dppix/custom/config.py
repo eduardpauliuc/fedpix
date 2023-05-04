@@ -22,8 +22,6 @@ L1_LAMBDA = 100
 LAMBDA_GP = 10
 LOAD_MODEL = False
 SAVE_MODEL = True
-CHECKPOINT_DISC = "inv_disc.pth.tar"
-CHECKPOINT_GEN = "inv_gen.pth.tar"
 
 both_transform = A.Compose(
     [
