@@ -1,27 +1,23 @@
 api_version: 3
-name: dppix
+name: hepix
 description: NVIDIA FLARE sample project yaml file
 
 participants:
   # change example.com to the FQDN of the server
-  - name: <servername>.westeurope.cloudapp.azure.com
+  - name: server1
     type: server
     org: nvidia
     fed_learn_port: 8002
     admin_port: 8003
-    enable_byoc: true
-  - name: FL-Asia-Site
+  - name: site-1
     type: client
     org: nvidia
-    enable_byoc: true
-  - name: FL-Europe-Site
+  - name: site-2
     type: client
     org: nvidia
-    enable_byoc: true
-  - name: FL-US-Site
+  - name: site-3
     type: client
     org: nvidia
-    enable_byoc: true
   - name: admin@nvidia.com
     type: admin
     org: nvidia
@@ -59,20 +55,6 @@ builders:
         overseer_exists: false
         args:
           sp_end_point: server1:8002:8003
-  - path: nvflare.lighter.impl.auth_policy.AuthPolicyBuilder
-    args:
-      orgs:
-        nvidia:
-          - relaxed
-      roles:
-        super: super user of system
-      groups:
-        relaxed:
-          desc: org group with relaxed policies
-          rules:
-            allow_byoc: true
-            allow_custom_datalist: true
-      disabled: false
   - path: nvflare.lighter.impl.he.HEBuilder
     args:
       poly_modulus_degree: 8192
