@@ -1,6 +1,8 @@
 import os.path
 
 import torch
+from azureml.core import Workspace, Dataset
+
 from nvflare.apis.event_type import EventType
 from tqdm import tqdm
 
@@ -23,6 +25,7 @@ from nvflare.app_common.abstract.model import make_model_learnable, model_learna
 from nvflare.app_common.app_constant import AppConstants
 from nvflare.app_opt.pt.model_persistence_format_manager import PTModelPersistenceFormatManager
 
+# from azureml.core import Workspace, Dataset
 
 class PixTrainer(Executor):
     def __init__(
@@ -34,6 +37,7 @@ class PixTrainer(Executor):
             submit_model_task_name=AppConstants.TASK_SUBMIT_MODEL,
             exclude_vars=None,
             pre_train_task_name=AppConstants.TASK_GET_WEIGHTS,
+            dataset_name="maps-dataset",
     ):
         """Cifar10 Trainer handles train and submit_model tasks. During train_task, it trains a
         simple network on CIFAR10 dataset. For submit_model task, it sends the locally trained model
@@ -104,12 +108,20 @@ class PixTrainer(Executor):
             data=self.disc.state_dict(), default_train_conf=self._disc_default_train_conf
         )
 
+        self.workspace = None
+        self.dataset_name = dataset_name
+
     def setup(self, fl_ctx: FLContext):
         self.log_info(fl_ctx, 'PREPARING')
         client_name = fl_ctx.get_identity_name()
-        root_dir = os.path.join(config.TRAIN_DIR, client_name)
 
-        self._train_dataset = MapDataset(root_dir=root_dir)
+        self.workspace = Workspace.from_config()
+
+        maps_dataset = Dataset.get_by_name(
+            self.workspace, self.dataset_name)
+        maps_dataset.download(target_path=config.TRAIN_DIR, overwrite=True)
+
+        self._train_dataset = MapDataset(root_dir=config.TRAIN_DIR)
         self._train_loader = DataLoader(
             self._train_dataset,
             batch_size=config.BATCH_SIZE,

@@ -1,6 +1,7 @@
 import torch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
+import os
 
 # DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
 # DEVICE = "cpu"
@@ -8,7 +9,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # ROOT_DIR = "/Users/eduardpauliuc/PycharmProjects/federated"
 # ROOT_DIR = "/content/drive/MyDrive/Licenta"
-ROOT_DIR = "/content/drive/MyDrive/Licenta"
+ROOT_DIR = os.path.join(os.path.expanduser('~'), 'data')
 TRAIN_DIR = ROOT_DIR + "/maps/train"
 VAL_DIR = ROOT_DIR + "/maps/val"
 MODELS_DIR = ROOT_DIR + "/saved_models"
@@ -20,7 +21,6 @@ NUM_WORKERS = 2
 IMAGE_SIZE = 256
 CHANNELS_IMG = 3
 L1_LAMBDA = 100
-LAMBDA_GP = 10
 LOAD_MODEL = False
 SAVE_MODEL = True
 
