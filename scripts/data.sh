@@ -48,16 +48,16 @@ US_DIR="${ROOT_DIR}/maps_az/site-3"
 
 #Upload data assets
 az ml data create --workspace-name Asia-Site \
-                  --name pneumonia-dataset \
+                  --name maps-dataset \
                   --path ${ASIA_DIR} \
                   --type uri_folder
 
 az ml data create --workspace-name Europe-Site \
-                  --name pneumonia-dataset \
+                  --name maps-dataset \
                   --path ${EUROPE_DIR} \
                   --type uri_folder
 
 az ml data create --workspace-name US-Site \
-                  --name pneumonia-dataset \
+                  --name maps-dataset \
                   --path ${US_DIR} \
                   --type uri_folder

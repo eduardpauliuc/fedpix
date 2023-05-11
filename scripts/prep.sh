@@ -2,7 +2,7 @@ az extension add --name ml
 
 az group create -n dppix -l northeurope
 
-az vm create -n fedserver --image microsoft-dsvm:ubuntu-1804:1804-gen2:latest --authentication-type password --public-ip-address-dns-name dppix \
+az vm create -n fedserver --image microsoft-dsvm:ubuntu-2004:2004-gen2:latest --authentication-type password --public-ip-address-dns-name dppix \
   --admin-password {PASSWORD}
 
 RANDOMQUALIFIER=$RANDOM
@@ -11,7 +11,7 @@ az ml workspace create -n Asia-Site --location eastasia
 az ml compute create --type ComputeInstance --name FedClientAsia$RANDOMQUALIFIER --workspace-name Asia-Site
 
 az ml workspace create -n Europe-Site --location northeurope
-az ml compute create --type ComputeInstance --name FedClientEurope$RANDOMQUALIFIER --workspace-name Eruope-Site
+az ml compute create --type ComputeInstance --name FedClientEurope$RANDOMQUALIFIER --workspace-name Europe-Site
 
 az ml workspace create -n US-Site --location eastus
 az ml compute create --type ComputeInstance --name FedClientUS$RANDOMQUALIFIER --workspace-name US-Site
