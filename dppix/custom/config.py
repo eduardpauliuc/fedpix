@@ -9,9 +9,9 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # ROOT_DIR = "/Users/eduardpauliuc/PycharmProjects/federated"
 # ROOT_DIR = "/content/drive/MyDrive/Licenta"
-ROOT_DIR = os.path.join(os.path.expanduser('~'), 'data')
-TRAIN_DIR = ROOT_DIR + "/maps/train"
-VAL_DIR = ROOT_DIR + "/maps/val"
+ROOT_DIR = os.path.join(os.path.expanduser('~'), 'localfiles/data')
+TRAIN_DIR = ROOT_DIR + "/train"
+VAL_DIR = ROOT_DIR + "/val"
 MODELS_DIR = ROOT_DIR + "/saved_models"
 EVALUATION_DIR = ROOT_DIR + "/maps/evaluation"
 RESULTS_DIR = ROOT_DIR + "/results"

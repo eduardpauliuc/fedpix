@@ -4,7 +4,7 @@ description: NVIDIA FLARE sample project yaml file
 
 participants:
   # change example.com to the FQDN of the server
-  - name: <servername>.westeurope.cloudapp.azure.com
+  - name: dppix.northeurope.cloudapp.azure.com
     type: server
     org: nvidia
     fed_learn_port: 8002
@@ -58,26 +58,6 @@ builders:
         #
         overseer_exists: false
         args:
-          sp_end_point: server1:8002:8003
-  - path: nvflare.lighter.impl.auth_policy.AuthPolicyBuilder
-    args:
-      orgs:
-        nvidia:
-          - relaxed
-      roles:
-        super: super user of system
-      groups:
-        relaxed:
-          desc: org group with relaxed policies
-          rules:
-            allow_byoc: true
-            allow_custom_datalist: true
-      disabled: false
-  - path: nvflare.lighter.impl.he.HEBuilder
-    args:
-      poly_modulus_degree: 8192
-      coeff_mod_bit_sizes: [60, 40, 40]
-      scale_bits: 40
-      scheme: CKKS
+          sp_end_point:  dppix.northeurope.cloudapp.azure.com:8002:8003
   - path: nvflare.lighter.impl.cert.CertBuilder
   - path: nvflare.lighter.impl.signature.SignatureBuilder

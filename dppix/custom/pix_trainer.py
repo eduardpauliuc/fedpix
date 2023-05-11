@@ -1,10 +1,8 @@
 import os.path
 
 import torch
-from azureml.core import Workspace, Dataset
 
 from nvflare.apis.event_type import EventType
-from tqdm import tqdm
 
 import config
 from dataset import MapDataset
@@ -14,6 +12,7 @@ from generator_model import Generator
 from discriminator_model import Discriminator
 from torch import nn, optim
 from torch.utils.data.dataloader import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 from nvflare.apis.dxo import DXO, DataKind, MetaKey, from_shareable
 from nvflare.apis.executor import Executor
@@ -24,6 +23,10 @@ from nvflare.apis.signal import Signal
 from nvflare.app_common.abstract.model import make_model_learnable, model_learnable_to_dxo
 from nvflare.app_common.app_constant import AppConstants
 from nvflare.app_opt.pt.model_persistence_format_manager import PTModelPersistenceFormatManager
+
+from azure.ai.ml import MLClient
+from azure.identity import DefaultAzureCredential
+import azure.ai.ml._artifacts._artifact_utilities as artifact_utils
 
 # from azureml.core import Workspace, Dataset
 
@@ -37,7 +40,9 @@ class PixTrainer(Executor):
             submit_model_task_name=AppConstants.TASK_SUBMIT_MODEL,
             exclude_vars=None,
             pre_train_task_name=AppConstants.TASK_GET_WEIGHTS,
-            dataset_name="maps-dataset",
+            dataset_name="maps",
+            dataset_version="1",
+            analytic_sender_id="analytic_sender"
     ):
         """Cifar10 Trainer handles train and submit_model tasks. During train_task, it trains a
         simple network on CIFAR10 dataset. For submit_model task, it sends the locally trained model
@@ -59,6 +64,8 @@ class PixTrainer(Executor):
         self._pre_train_task_name = pre_train_task_name
         self._submit_model_task_name = submit_model_task_name
         self._exclude_vars = exclude_vars
+        self.analytic_sender_id = analytic_sender_id
+        self.writer = None
 
         # Training setup
         # self.model = SimpleNetwork()
@@ -110,16 +117,19 @@ class PixTrainer(Executor):
 
         self.workspace = None
         self.dataset_name = dataset_name
+        self.dataset_version = dataset_version
 
     def setup(self, fl_ctx: FLContext):
         self.log_info(fl_ctx, 'PREPARING')
         client_name = fl_ctx.get_identity_name()
 
-        self.workspace = Workspace.from_config()
+        # self.workspace = MLClient.from_config(
+        #     DefaultAzureCredential()
+        # )
 
-        maps_dataset = Dataset.get_by_name(
-            self.workspace, self.dataset_name)
-        maps_dataset.download(target_path=config.TRAIN_DIR, overwrite=True)
+        # data_info = self.workspace.data.get(name=self.dataset_name, version=self.dataset_version)
+        # # Download the dataset
+        # artifact_utils.download_artifact_from_aml_uri(uri = data_info.path, destination = config.ROOT_DIR, datastore_operation=self.workspace.datastores)
 
         self._train_dataset = MapDataset(root_dir=config.TRAIN_DIR)
         self._train_loader = DataLoader(
@@ -129,18 +139,24 @@ class PixTrainer(Executor):
             num_workers=config.NUM_WORKERS,
         )
 
-        val_dir = os.path.join(config.VAL_DIR, client_name)
+        val_dir = config.VAL_DIR
         self._val_dataset = MapDataset(root_dir=val_dir)
         self._val_loader = DataLoader(self._val_dataset, batch_size=1, shuffle=True)
         self._n_iterations = len(self._train_loader)
 
-        self._evaluation_folder = os.path.join(config.EVALUATION_DIR, client_name)
+        self._evaluation_folder = config.EVALUATION_DIR
         if not os.path.exists(self._evaluation_folder):
             os.makedirs(self._evaluation_folder)
 
-        self._results_folder = os.path.join(config.RESULTS_DIR, client_name)
+        self._results_folder = config.RESULTS_DIR
         if not os.path.exists(self._results_folder):
             os.makedirs(self._results_folder)
+
+
+        engine = fl_ctx.get_engine()
+        self.writer = engine.get_component(self.analytic_sender_id)
+        if not self.writer:  # else use local TensorBoard writer only
+            self.writer = SummaryWriter(fl_ctx.get_prop(FLContextKey.APP_ROOT))
 
     def handle_event(self, event_type: str, fl_ctx: FLContext):
         if event_type == EventType.START_RUN:
@@ -215,6 +231,15 @@ class PixTrainer(Executor):
 
         return outgoing_dxo.to_shareable()
 
+    def send_results(self, results, epoch):
+        self.writer.add_scalar("d_loss", results[0], epoch)
+        self.writer.add_scalar("d_real", results[1], epoch)
+        self.writer.add_scalar("d_fake", results[2], epoch)
+        self.writer.add_scalar("g_total", results[3], epoch)
+        self.writer.add_scalar("g_disc", results[4], epoch)
+        self.writer.add_scalar("g_l1", results[5], epoch)
+
+
     def _local_train(self, fl_ctx, gen_weights, disc_weights, abort_signal):
         # Set the model weights
         self.gen.load_state_dict(state_dict=gen_weights)
@@ -232,6 +257,7 @@ class PixTrainer(Executor):
             results = self.train_fn(fl_ctx, epoch, abort_signal)
 
             results_queue.append(results)
+            send_results(results, epoch)
 
             # run_number = shared_context.get_prop(AppConstants.CURRENT_ROUND)
 
@@ -271,7 +297,6 @@ class PixTrainer(Executor):
             #
 
     def train_fn(self, fl_ctx, epoch, abort_signal):
-        # loop = tqdm(self._train_loader, leave=True)
 
         d_loss = 0
         dr_loss = 0
