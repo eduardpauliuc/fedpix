@@ -37,9 +37,9 @@
           "disc": "WEIGHTS"
         },
         "aggregation_weights": {
-          "site-1": 1.0,
-          "site-2": 1.0,
-          "site-3": 1.0
+          "FL-North-Europe-Site": 1.0,
+          "FL-West-Europe-Site": 1.0,
+          "FL-US-Site": 1.0
         }
       }
     },

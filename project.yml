@@ -10,11 +10,11 @@ participants:
     fed_learn_port: 8002
     admin_port: 8003
     enable_byoc: true
-  - name: FL-Asia-Site
+  - name: FL-North-Europe-Site
     type: client
     org: nvidia
     enable_byoc: true
-  - name: FL-Europe-Site
+  - name: FL-West-Europe-Site
     type: client
     org: nvidia
     enable_byoc: true

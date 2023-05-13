@@ -8,7 +8,7 @@
         "path": "pix_trainer.PixTrainer",
         "args": {
           "lr": 0.0002,
-          "epochs": 1,
+          "epochs": 10,
           "analytic_sender_id": "analytic_sender",
           "data_path": "~/localfiles/data"
         }
@@ -22,9 +22,9 @@
           {
           "path": "nvflare.app_common.filters.svt_privacy.SVTPrivacy",
           "args": {
-            "fraction": 0.9,
+            "fraction": 1,
             "epsilon": 0.001,
-            "noise_var": 1.0,
+            "noise_var": 0.1,
             "gamma": 1e-4
           }
         }
