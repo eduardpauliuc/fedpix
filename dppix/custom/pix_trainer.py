@@ -24,9 +24,9 @@ from nvflare.app_common.abstract.model import make_model_learnable, model_learna
 from nvflare.app_common.app_constant import AppConstants
 from nvflare.app_opt.pt.model_persistence_format_manager import PTModelPersistenceFormatManager
 
-from azure.ai.ml import MLClient
-from azure.identity import DefaultAzureCredential
-import azure.ai.ml._artifacts._artifact_utilities as artifact_utils
+# from azure.ai.ml import MLClient
+# from azure.identity import DefaultAzureCredential
+# import azure.ai.ml._artifacts._artifact_utilities as artifact_utils
 
 # from azureml.core import Workspace, Dataset
 
@@ -66,6 +66,7 @@ class PixTrainer(Executor):
         self._exclude_vars = exclude_vars
         self.analytic_sender_id = analytic_sender_id
         self.writer = None
+        self.epoch_global = 0
 
         # Training setup
         # self.model = SimpleNetwork()
@@ -257,7 +258,8 @@ class PixTrainer(Executor):
             results = self.train_fn(fl_ctx, epoch, abort_signal)
 
             results_queue.append(results)
-            send_results(results, epoch)
+            current_epoch = self.epoch_global + epoch
+            self.send_results(results, current_epoch)
 
             # run_number = shared_context.get_prop(AppConstants.CURRENT_ROUND)
 
@@ -265,8 +267,9 @@ class PixTrainer(Executor):
                 save_results(results_queue, folder=self._results_folder)
                 results_queue = []
 
-            save_some_examples(self.gen, self._val_loader, epoch, folder=self._evaluation_folder)
-
+            save_some_examples(self.gen, self._val_loader, current_epoch, folder=self._evaluation_folder)
+        
+        self.epoch_global += self._epochs
             # running_loss = 0.0
             # for i, batch in enumerate(self._train_loader):
             #     if abort_signal.triggered:
