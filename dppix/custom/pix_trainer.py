@@ -1,5 +1,6 @@
 import os.path
 
+import numpy as np
 import torch
 
 from nvflare.apis.event_type import EventType
@@ -153,7 +154,6 @@ class PixTrainer(Executor):
         if not os.path.exists(self._results_folder):
             os.makedirs(self._results_folder)
 
-
         engine = fl_ctx.get_engine()
         self.writer = engine.get_component(self.analytic_sender_id)
         if not self.writer:  # else use local TensorBoard writer only
@@ -197,7 +197,7 @@ class PixTrainer(Executor):
                 self._save_local_model(fl_ctx)
 
                 # Get the new state dict and send as weights
-                return self._get_model_weights()
+                return self._get_model_weights_diff(fl_ctx, gen_weights, disc_weights)
             elif task_name == self._submit_model_task_name:
                 # Load local model
                 gen, disc = self._load_local_models(fl_ctx)
@@ -232,6 +232,76 @@ class PixTrainer(Executor):
 
         return outgoing_dxo.to_shareable()
 
+    def _get_model_weights_diff(self, fl_ctx, global_gen, global_disc) -> Shareable:
+        # Get the new state dict and send as weights
+        local_gen = {k: v.cpu().numpy() for k, v in self.gen.state_dict().items()}
+        local_disc = {k: v.cpu().numpy() for k, v in self.disc.state_dict().items()}
+        gen_model_diff = {}
+        disc_model_diff = {}
+        diff_norm = 0.0
+        n_global, n_local = 0, 0
+        for var_name in local_gen:
+            n_local += 1
+            if var_name not in global_gen:
+                continue
+            gen_model_diff[var_name] = np.subtract(local_gen[var_name].cpu().numpy(), global_gen[var_name],
+                                                   dtype=np.float32)
+            if np.any(np.isnan(gen_model_diff[var_name])):
+                self.system_panic(f"{var_name} GEN weights became NaN...", fl_ctx)
+                return make_reply(ReturnCode.EXECUTION_EXCEPTION)
+            n_global += 1
+            diff_norm += np.linalg.norm(gen_model_diff[var_name])
+            if n_global != n_local:
+                raise ValueError(
+                    f"Could not compute delta for all layers! Only {n_local} local of {n_global} global layers "
+                    f"computed... "
+                )
+        self.log_info(
+            fl_ctx,
+            f" GEN diff norm for {n_local} local of {n_global} global layers: {diff_norm}",
+        )
+
+        diff_norm = 0.0
+        n_global, n_local = 0, 0
+        for var_name in local_disc:
+            n_local += 1
+            if var_name not in global_disc:
+                continue
+            disc_model_diff[var_name] = np.subtract(local_disc[var_name].cpu().numpy(), global_disc[var_name],
+                                                    dtype=np.float32)
+            if np.any(np.isnan(disc_model_diff[var_name])):
+                self.system_panic(f"{var_name} disc weights became NaN...", fl_ctx)
+                return make_reply(ReturnCode.EXECUTION_EXCEPTION)
+            n_global += 1
+            diff_norm += np.linalg.norm(disc_model_diff[var_name])
+            if n_global != n_local:
+                raise ValueError(
+                    f"Could not compute delta for all layers! Only {n_local} local of {n_global} global layers "
+                    f"computed... "
+                )
+        self.log_info(
+            fl_ctx,
+            f" disc diff norm for {n_local} local of {n_global} global layers: {diff_norm}",
+        )
+
+        # build the shareable
+        gen_dxo = DXO(data_kind=DataKind.WEIGHT_DIFF, data=gen_model_diff,
+                      meta={MetaKey.NUM_STEPS_CURRENT_ROUND: self._n_iterations})
+
+        disc_dxo = DXO(
+            data_kind=DataKind.WEIGHT_DIFF, data=disc_model_diff,
+            meta={MetaKey.NUM_STEPS_CURRENT_ROUND: self._n_iterations}
+
+        )
+
+        outgoing_dxo = DXO(
+            data_kind=DataKind.COLLECTION, data={'gen': gen_dxo, 'disc': disc_dxo},
+            meta={MetaKey.NUM_STEPS_CURRENT_ROUND: self._n_iterations}
+
+        )
+
+        return outgoing_dxo.to_shareable()
+
     def send_results(self, results, epoch):
         self.writer.add_scalar("d_loss", results[0], epoch)
         self.writer.add_scalar("d_real", results[1], epoch)
@@ -239,7 +309,6 @@ class PixTrainer(Executor):
         self.writer.add_scalar("g_total", results[3], epoch)
         self.writer.add_scalar("g_disc", results[4], epoch)
         self.writer.add_scalar("g_l1", results[5], epoch)
-
 
     def _local_train(self, fl_ctx, gen_weights, disc_weights, abort_signal):
         # Set the model weights
@@ -268,39 +337,10 @@ class PixTrainer(Executor):
                 results_queue = []
 
             save_some_examples(self.gen, self._val_loader, current_epoch, folder=self._evaluation_folder)
-        
+
         self.epoch_global += self._epochs
-            # running_loss = 0.0
-            # for i, batch in enumerate(self._train_loader):
-            #     if abort_signal.triggered:
-            # If abort_signal is triggered, we simply return.
-            # The outside function will check it again and decide steps to take.
-            # return
-
-            # images, labels = batch[0].to(self.device), batch[1].to(self.device)
-            # self.optimizer.zero_grad()
-
-            # predictions = self.model(images)
-            # cost = self.loss(predictions, labels)
-            # cost.backward()
-            # self.optimizer.step()
-
-            # running_loss += cost.cpu().detach().numpy() / images.size()[0]
-            # if i % 3000 == 0:
-            #     self.log_info(
-            #         fl_ctx, f"Epoch: {epoch}/{self._epochs}, Iteration: {i}, " f"Loss: {running_loss / 3000}"
-            #     )
-            #     running_loss = 0.0
-
-            # MINE
-            # if config.SAVE_MODEL and epoch % 5 == 0:
-            #     print("Saved")
-            #     save_checkpoint(gen, opt_gen, filename=config.CHECKPOINT_GEN)
-            #     save_checkpoint(disc, opt_disc, filename=config.CHECKPOINT_DISC)
-            #
 
     def train_fn(self, fl_ctx, epoch, abort_signal):
-
         d_loss = 0
         dr_loss = 0
         df_loss = 0

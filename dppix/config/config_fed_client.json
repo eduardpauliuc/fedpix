@@ -1,6 +1,6 @@
 {
   "format_version": 2,
-
+  "SIGMA0": 0,
   "executors": [
     {
       "tasks": ["train", "submit_model", "get_weights"],
@@ -19,14 +19,7 @@
     {
       "tasks": ["train"],
       "filters":[
-          {
-          "path": "nvflare.app_common.filters.svt_privacy.SVTPrivacy",
-          "args": {
-            "fraction": 1,
-            "epsilon": 0.001,
-            "noise_var": 0.1,
-            "gamma": 1e-4
-          }
+        {
         }
       ]
     }
