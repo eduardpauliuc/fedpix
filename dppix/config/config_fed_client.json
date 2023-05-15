@@ -1,6 +1,6 @@
 {
   "format_version": 2,
-  "SIGMA0": 0,
+  "SIGMA0": 0.1,
   "executors": [
     {
       "tasks": ["train", "submit_model", "get_weights"],
@@ -20,7 +20,12 @@
       "tasks": ["train"],
       "filters":[
         {
-        }
+          "path": "gaussian_privacy.GaussianPrivacy",
+          "args": {
+              "sigma0": "{SIGMA0}",
+              "max_percentile": 95
+          }
+        } 
       ]
     }
   ],
