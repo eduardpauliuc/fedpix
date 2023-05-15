@@ -1,20 +1,27 @@
 api_version: 3
-name: example_project
+name: dppix
 description: NVIDIA FLARE sample project yaml file
 
 participants:
   # change example.com to the FQDN of the server
-  - name: server1
+  - name: dppix.northeurope.cloudapp.azure.com
     type: server
     org: nvidia
     fed_learn_port: 8002
     admin_port: 8003
-  - name: site-1
+    enable_byoc: true
+  - name: FL-Asia-Site
     type: client
     org: nvidia
-  - name: site-2
+    enable_byoc: true
+  - name: FL-Europe-Site
     type: client
     org: nvidia
+    enable_byoc: true
+  - name: FL-US-Site
+    type: client
+    org: nvidia
+    enable_byoc: true
   - name: admin@nvidia.com
     type: admin
     org: nvidia
@@ -48,10 +55,9 @@ builders:
         #   tool will fill role, name and other local parameters automatically.
         # if overseer_exists is false, args in this section will be used and the sp_end_point
         # must match the server defined above in the format of SERVER_NAME:FL_PORT:ADMIN_PORT
-        # 
+        #
         overseer_exists: false
         args:
-          sp_end_point: server1:8002:8003
-
+          sp_end_point:  dppix.northeurope.cloudapp.azure.com:8002:8003
   - path: nvflare.lighter.impl.cert.CertBuilder
   - path: nvflare.lighter.impl.signature.SignatureBuilder

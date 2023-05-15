@@ -43,7 +43,8 @@ class PixTrainer(Executor):
             pre_train_task_name=AppConstants.TASK_GET_WEIGHTS,
             dataset_name="maps",
             dataset_version="1",
-            analytic_sender_id="analytic_sender"
+            analytic_sender_id="analytic_sender",
+            start_epoch=0,
     ):
         """Cifar10 Trainer handles train and submit_model tasks. During train_task, it trains a
         simple network on CIFAR10 dataset. For submit_model task, it sends the locally trained model
@@ -67,7 +68,7 @@ class PixTrainer(Executor):
         self._exclude_vars = exclude_vars
         self.analytic_sender_id = analytic_sender_id
         self.writer = None
-        self.epoch_global = 0
+        self.epoch_global = start_epoch
 
         # Training setup
         # self.model = SimpleNetwork()
@@ -197,7 +198,7 @@ class PixTrainer(Executor):
                 self._save_local_model(fl_ctx)
 
                 # Get the new state dict and send as weights
-                return self._get_model_weights_diff(fl_ctx, gen_weights, disc_weights)
+                return self._get_model_weights_diff(fl_ctx, dxo.data['gen'].data, dxo.data['disc'].data)
             elif task_name == self._submit_model_task_name:
                 # Load local model
                 gen, disc = self._load_local_models(fl_ctx)
@@ -234,8 +235,8 @@ class PixTrainer(Executor):
 
     def _get_model_weights_diff(self, fl_ctx, global_gen, global_disc) -> Shareable:
         # Get the new state dict and send as weights
-        local_gen = {k: v.cpu().numpy() for k, v in self.gen.state_dict().items()}
-        local_disc = {k: v.cpu().numpy() for k, v in self.disc.state_dict().items()}
+        local_gen = self.gen.state_dict()
+        local_disc = self.disc.state_dict()
         gen_model_diff = {}
         disc_model_diff = {}
         diff_norm = 0.0
@@ -383,7 +384,7 @@ class PixTrainer(Executor):
             self._g_scaler.step(self.opt_gen)
             self._g_scaler.update()
 
-            if idx % 5 == 0:
+            if idx % 10 == 0:
                 self.log_info(
                     fl_ctx, f"Epoch: {epoch}/{self._epochs}, Iteration: {idx}, "
                             f"G_loss: {G_loss.cpu().item()}"

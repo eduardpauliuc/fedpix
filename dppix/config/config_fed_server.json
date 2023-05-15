@@ -33,8 +33,8 @@
       "path": "nvflare.app_common.aggregators.intime_accumulate_model_aggregator.InTimeAccumulateWeightedAggregator",
       "args": {
         "expected_data_kind": {
-          "gen": "WEIGHTS",
-          "disc": "WEIGHTS"
+          "gen": "WEIGHT_DIFF",
+          "disc": "WEIGHT_DIFF"
         },
         "aggregation_weights": {
           "FL-North-Europe-Site": 1.0,
@@ -69,7 +69,7 @@
       "path": "scatter_and_gather_gan.ScatterAndGatherGAN",
       "args": {
         "min_clients": 3,
-        "num_rounds": 20,
+        "num_rounds": 5,
         "start_round": 0,
         "wait_time_after_min_received": 10,
         "aggregator_id": "aggregator",
