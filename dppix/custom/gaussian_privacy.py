@@ -77,7 +77,8 @@ class GaussianPrivacy(DXOFilter):
 
             n_vars = len(weights)
             for var_name in weights:
-                weights[var_name] = weights[var_name] + np.random.normal(0.0, noise_sigma, np.shape(weights[var_name]))
+                if 'weight' in var_name or 'bias' in var_name:
+                    weights[var_name] = weights[var_name] + np.random.normal(0.0, noise_sigma, np.shape(weights[var_name]))
             self.log_info(
                 fl_ctx,
                 f"Added Gaussian noise to {n_vars} vars with sigma"
