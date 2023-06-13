@@ -35,14 +35,11 @@ def run_predictions(gen, folder):
             y_fake = gen(x)
             y_fake = y_fake * 0.5 + 0.5  # remove normalization#
             save_image(y_fake, folder + f"/{idx+1}.png")
-            # save_image(x * 0.5 + 0.5, folder + f"/{}.png")
-            # save_image(y * 0.5 + 0.5, "real_outputs" + f"/{idx}.png")
 
         # break
 
 
 def run(model_path, folder):
-    # run_predictions()
     gen = Generator(in_channels=3, features=64).to(config.DEVICE)
 
     load_checkpoint(model_path, gen)
