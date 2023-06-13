@@ -1,7 +1,7 @@
 from PIL import Image
 import os
 import matplotlib.pyplot as plt
-images_dir = '../generated/handpicked/dp_996'
+images_dir = '../generated/handpicked/1'
 # Load your images
 input_image = Image.open(os.path.join(images_dir, "input.png"))
 output_image1 = Image.open(os.path.join(images_dir, "output.png"))
