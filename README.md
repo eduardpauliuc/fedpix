@@ -1,4 +1,7 @@
-### This is the code for the experimental part of my Bachelor's Thesis, which can be read here:  [thesis.pdf](https://github.com/eduardpauliuc/fedpix/files/12746011/Thesis_Eduard_Pauliuc.pdf)
+### This is the code for the experimental part of my Bachelor's Thesis, which can be read here:  [Thesis.pdf](https://github.com/eduardpauliuc/fedpix/files/12746011/Thesis_Eduard_Pauliuc.pdf)
+
+### Part of this work is presented in this paper:  [Privacy-Preserving-GANs-FL-FHE.pdf](https://github.com/eduardpauliuc/fedpix/files/12746260/IEEE_Conference_Template.pdf)
+
 
 ![system](https://github.com/eduardpauliuc/fedpix/assets/41806656/9b2d4069-dcd2-42f7-89cd-711a56bc80ba)
 
